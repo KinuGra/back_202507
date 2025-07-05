@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import environ
 import os
 from pathlib import Path
+from utils.discord_log import DiscordWebhookHandler
 
 # プロジェクトのルートディレクトリを取得
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,6 +31,31 @@ env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+DISCORD_WEBHOOK_URL = env("DISCORD_WEBHOOK_URL")
+
+# Discordにログを送る処理
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "discord": {
+            "level": "ERROR",
+            "class": "utils.discord_log.DiscordWebhookHandler",
+            "webhook_url": DISCORD_WEBHOOK_URL,  # これは class の __init__ に渡される
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "discord"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

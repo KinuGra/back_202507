@@ -16,3 +16,6 @@ class ItemViewSet(viewsets.ModelViewSet):
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, Django!")
+
+def test_error(request):
+    raise ValueError("テスト用のエラーが発生しました")
