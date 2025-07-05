@@ -29,7 +29,7 @@ env.read_env(os.path.join(BASE_DIR, '.env'))
 # .envファイルから各環境変数を読み込む
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
-ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
