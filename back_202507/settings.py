@@ -24,6 +24,7 @@ env = environ.Env(
     # 初期値を設定
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
+    CORS_ALLOW_ALL_ORIGINS=(list, []),
 )
 env.read_env(os.path.join(BASE_DIR, '.env'))
 
@@ -159,6 +160,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS. myアプリのみ許可
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-]
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
