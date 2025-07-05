@@ -21,19 +21,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # .envファイルを読み込む
 env = environ.Env(
     # 初期値を設定
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
 )
 env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # .envファイルから各環境変数を読み込む
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
