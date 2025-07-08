@@ -17,12 +17,12 @@ Including another URLconf
 from django.contrib import admin # Djangoの管理サイト機能を利用するためのモジュールをインポート
 from django.urls import path, include # URLパスを定義するためのpath関数と、他のURLconfを参照するためのinclude関数をインポート
 from rest_framework.routers import DefaultRouter # DRFから、デフォルトのルータークラスDefaultRouterをインポート。ViewSetとURLの自動マッピングを可能にする
-from main.views import ItemViewSet # api/views.pyからItemViewSetクラスをインポート
+from main.views import UserViewSet # api/views.pyからUserViewSetクラスをインポート
 
 # DefaultRouterのインスタンスを作成
 router = DefaultRouter()
-# ItemViewSetをitemsパスでルーターに登録している。これにより、ItemViewSetに定義された操作に基づいて、自動的にURLが生成される
-router.register(r'items', ItemViewSet)
+# UserViewSetをusersパスでルーターに登録している。これにより、UserViewSetに定義された操作に基づいて、自動的にURLが生成される
+router.register(r'users', UserViewSet)
 
 urlpatterns = [
     # Django管理サイトへのpath
