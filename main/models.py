@@ -5,3 +5,16 @@ class Item(models.Model): # Itemという名前の新しいモデル（データ
     name = models.CharField(max_length=100)
     # descriptionというフィールドを定義。長いテキスト（TextField）を保存できるようにしている
     description = models.TextField()
+
+class Room(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    roomId = models.CharField(max_length=100, unique=True)
+    STATUS_CHOICES = [
+        ('waiting', 'Waiting'),
+        ('in_progress', 'In Progress'),
+        ('finished', 'Finished'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
+    currentSeq = models.IntegerField()
+    quizId = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
