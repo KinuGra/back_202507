@@ -1,5 +1,5 @@
 from rest_framework import serializers # Django REST Frameworkのserializersモジュールをインポート
-from .models import Item, Room # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
+from .models import Item, Room, User # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
 
 '''
 ItemモデルのデータをJSON形式などに変換するクラス。
@@ -26,3 +26,16 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         # Roomモデルの全フィールドに合わせて修正
         fields = ['id', 'roomId', 'status', 'currentSeq', 'quizId', 'created_at']
+
+'''
+UserモデルのデータをJSON形式などに変換するクラス。
+簡単にシリアライズ（データ構造を連続的な形に変換）・デシリアライズ（連続的なデータを元のデータ構造に戻す）できるようにするためのUserSerializerクラスを定義しており、
+serializers.ModelSerializerを継承しています
+'''
+class UserSerializer(serializers.ModelSerializer):
+    # UserSerializerクラスの設定を行う内部クラスMetaを定義
+    class Meta:
+        # シリアライザが扱うモデルをUserに指定しています
+        model = User
+        # シリアライズされるときに含めるフィールドをuuid、username、icon、loginId、password、created_atに限定する
+        fields = ['uuid', 'username', 'icon', 'loginId', 'password', 'created_at']

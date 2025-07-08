@@ -25,6 +25,14 @@ router = DefaultRouter()
 router.register(r'items', ItemViewSet)
 router.register(r'rooms', RoomViewSet) # 追加
 
+
+from main.views import UserViewSet # api/views.pyからUserViewSetクラスをインポート
+
+# DefaultRouterのインスタンスを作成
+router = DefaultRouter()
+# UserViewSetをusersパスでルーターに登録している。これにより、UserViewSetに定義された操作に基づいて、自動的にURLが生成される
+router.register(r'users', UserViewSet)
+
 urlpatterns = [
     # Django管理サイトへのpath
     path('admin/', admin.site.urls),
