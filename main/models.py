@@ -20,6 +20,7 @@ class Room(models.Model):
     currentSeq = models.IntegerField()
     quizId = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
 class User(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # ユーザーを一意に識別するためのUUIDフィールド
     username = models.CharField(max_length=150, blank=True, null=True) # ユーザー名のフィールド
@@ -36,3 +37,14 @@ class User(models.Model):
 
     def __str__(self):
         return f"{self.username or 'Guest'} ({self.uuid})"
+    
+class QuizData1(models.Model):
+    questionId = models.AutoField(primary_key=True) #AutoFieldでもよいかも
+    quizId = models.IntegerField()
+    question = models.TextField(max_length=255)
+    answer_letters = models.CharField(max_length=255)
+    answer_full = models.TextField(max_length=255)
+    category = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Quiz {self.questionId}: {self.question[:20]}..."  
