@@ -42,7 +42,7 @@ class QuizData1(models.Model):
     questionId = models.AutoField(primary_key=True) #AutoFieldでもよいかも
     quizId = models.IntegerField()
     question = models.TextField(max_length=255)
-    answer_letters = models.CharField(max_length=255)
+    answer_letters = models.JSONField(blank=True, null=True)
     answer_full = models.TextField(max_length=255)
     category = models.CharField(max_length=100, blank=True, null=True)
 

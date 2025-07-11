@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Room, User
+from .models import Room, User, QuizData1
 
 class RoomAdmin(admin.ModelAdmin):
     list_display = ['id', 'roomId', 'status', 'currentSeq', 'quizId', 'created_at']
@@ -16,5 +16,10 @@ class UserAdmin(admin.ModelAdmin):
         return "-"
     icon_tag.short_description = 'Icon'
 
+class QuizData1Admin(admin.ModelAdmin):
+    list_display = ['questionId', 'quizId', 'question', 'answer_letters', 'answer_full', 'category']
+    search_fields = ['question', 'answer_letters', 'category']
+
 admin.site.register(Room, RoomAdmin)
 admin.site.register(User, UserAdmin)
+admin.site.register(QuizData1, QuizData1Admin)
