@@ -1,5 +1,5 @@
 from rest_framework import serializers # Django REST Frameworkのserializersモジュールをインポート
-from .models import Item, Room, RoomParticipants, User, Room, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
+from .models import Answer, Item, Room, RoomParticipants, Summary, User, Room, Ranking, QuizData1, QuizData2, QuizData3 # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
 
 '''
 ItemモデルのデータをJSON形式などに変換するクラス。
@@ -50,7 +50,32 @@ class QuizData1Serializer(serializers.ModelSerializer):
         model = QuizData1
         fields = ['questionId', 'quizId', 'question', 'answer_letters', 'answer_full', 'category']
 
+class QuizData2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizData2
+        fields = ['questionId', 'quizId', 'question', 'answer_letters', 'answer_full', 'category']  
+
+class QuizData3Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizData3
+        fields = ['questionId', 'quizId', 'question', 'answer_letters', 'answer_full', 'category']  
+
 class RoomParticipantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomParticipants
         fields = ['roomId', 'uuid', 'currentScore', 'joined_at']
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['roomPK_id', 'uuid', 'roomId', 'currentSeq', 'answerTime', 'quizId', 'questionId', 'isCorrect']
+
+class SummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Summary
+        fields = ['uuid', 'totalQuestions', 'correctAnswers', 'finalScore', 'finalRank', 'created_at']  
+
+class RankingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ranking
+        fields = ['username', 'finalScore']

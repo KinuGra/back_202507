@@ -104,3 +104,56 @@ class RoomParticipants(models.Model):
 
     def __str__(self):
         return f"{self.uuid.username} in {self.roomId.roomId}"
+    
+class Answer(models.Model):
+    roomPK_id = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='roomPK_answers')
+    uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    roomId = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room_answers')
+    currentSeq = models.IntegerField(default=0)
+    answerTime = models.BooleanField(default=False)
+    quizId = models.IntegerField()
+    questionId = models.IntegerField()
+    isCorrect = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.uuid.username} answered {self.answer} for question {self.questionId} in room {self.roomId.roomId}"
+    
+class Summary(models.Model):
+    uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    totalQuestions = models.IntegerField(default=0)
+    correctAnswers = models.IntegerField(default=0)
+    finalScore = models.IntegerField(default=0)
+    finalRank = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.uuid.username}'s Summary - Score: {self.finalScore}, Rank: {self.finalRank}"
+    
+class QuizData2(models.Model):
+    questionId = models.IntegerField(unique=True)
+    quizId = models.IntegerField()
+    question = models.TextField(max_length=255)
+    answer_letters = models.JSONField(blank=True, null=True)
+    answer_full = models.TextField(max_length=255)
+    category = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Quiz {self.questionId}: {self.question[:20]}..."
+    
+class QuizData3(models.Model):
+    questionId = models.IntegerField(unique=True)
+    quizId = models.IntegerField()
+    question = models.TextField(max_length=255)
+    answer_letters = models.JSONField(blank=True, null=True)
+    answer_full = models.TextField(max_length=255)
+    category = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Quiz {self.questionId}: {self.question[:20]}..."
+    
+class Ranking(models.Model):
+    username = models.CharField(max_length=150, blank=True, null=True)
+    finalScore = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.username or 'Anonymous'} - Score: {self.finalScore}"
