@@ -21,12 +21,14 @@ class Migration(migrations.Migration):
             name='roomPK_id',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='roomPK_answers', to='main.room'),
         ),
-        migrations.CreateModel(
-            name='Participantion',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('room', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.room')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.user')),
-            ],
+        migrations.AlterField(
+            model_name='roomparticipants',
+            name='roomId',
+            field=models.IntegerField(),
+        ),
+        migrations.AlterField(
+            model_name='roomparticipants',
+            name='uuid',
+            field=models.IntegerField(unique=True),
         ),
     ]
