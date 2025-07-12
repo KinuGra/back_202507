@@ -34,11 +34,11 @@ class User(models.Model):
     password = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        # パスワードをハッシュ化（既にハッシュ化されているなら無視）
-        if self.password and not self.password.startswith('pbkdf2_'):
-            self.password = make_password(self.password)
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # パスワードをハッシュ化（既にハッシュ化されているなら無視）
+    #     if self.password and not self.password.startswith('pbkdf2_'):
+    #         self.password = make_password(self.password)
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.username or 'Guest'} ({self.uuid})"
@@ -48,7 +48,7 @@ class QuizData1(models.Model):
     questionId = models.IntegerField(unique=True)
     quizId = models.IntegerField()
     question = models.TextField(max_length=255)
-    answer_letters = models.JSONField(blank=True, null=True)
+    answer_letters = models.TextField(blank=True, null=True)
     answer_full = models.TextField(max_length=255)
     category = models.CharField(max_length=100, blank=True, null=True)
 
@@ -56,9 +56,9 @@ class QuizData1(models.Model):
         return f"Quiz {self.questionId}: {self.question[:20]}..."
 
 class Answer(models.Model):
-    roomPK_id = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='roomPK_answers')
-    uuid = models.ForeignKey(User, on_delete=models.CASCADE)
-    roomId = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room_answers')
+    roomPK_id = models.IntegerField()
+    uuid = models.TextField(unique=True)
+    roomId = models.IntegerField()
     currentSeq = models.IntegerField(default=0)
     answerTime = models.BooleanField(default=False)
     quizId = models.IntegerField()
@@ -69,7 +69,7 @@ class Answer(models.Model):
         return f"{self.uuid.username} answered {self.answer} for question {self.questionId} in room {self.roomId.roomId}"
     
 class Summary(models.Model):
-    uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    uuid = models.TextField(unique=True)
     totalQuestions = models.IntegerField(default=0)
     correctAnswers = models.IntegerField(default=0)
     finalScore = models.IntegerField(default=0)
@@ -83,7 +83,7 @@ class QuizData2(models.Model):
     questionId = models.IntegerField(unique=True)
     quizId = models.IntegerField()
     question = models.TextField(max_length=255)
-    answer_letters = models.JSONField(blank=True, null=True)
+    answer_letters = models.TextField(blank=True, null=True)
     answer_full = models.TextField(max_length=255)
     category = models.CharField(max_length=100, blank=True, null=True)
 
@@ -94,7 +94,7 @@ class QuizData3(models.Model):
     questionId = models.IntegerField(unique=True)
     quizId = models.IntegerField()
     question = models.TextField(max_length=255)
-    answer_letters = models.JSONField(blank=True, null=True)
+    answer_letters = models.TextField(blank=True, null=True)
     answer_full = models.TextField(max_length=255)
     category = models.CharField(max_length=100, blank=True, null=True)
 
@@ -109,7 +109,7 @@ class Ranking(models.Model):
         return f"{self.username or 'Anonymous'} - Score: {self.finalScore}"
 class RoomParticipants(models.Model):
     roomId = models.IntegerField()
-    uuid = models.IntegerField(unique=True)
+    uuid = models.TextField(unique=True)
     currentScore = models.IntegerField(default=0)
     joined_at = models.DateTimeField(auto_now_add=True)
 
