@@ -9,7 +9,7 @@ class Command(BaseCommand):
         # Create test quiz questions
         test_questions = [
             {
-                'questionId': 1,
+                'questionId': 0,
                 'quizId': 1,
                 'question': 'What is the Japanese word for apple?',
                 'answer_full': 'りんご',
@@ -17,7 +17,7 @@ class Command(BaseCommand):
                 'category': 'Japanese'
             },
             {
-                'questionId': 2,
+                'questionId': 1,
                 'quizId': 1,
                 'question': 'What is the Japanese word for cat?',
                 'answer_full': 'ねこ',
@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 'category': 'Japanese'
             },
             {
-                'questionId': 3,
+                'questionId': 2,
                 'quizId': 1,
                 'question': 'What is the Japanese word for water?',
                 'answer_full': 'みず',
