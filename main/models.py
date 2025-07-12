@@ -1,11 +1,8 @@
-import uuid # UUIDを生成するためのモジュールをインポート
-from django.db import models # Djangoのデータベース機能（モデル）を使うために、modelsモジュールをインポート
-import uuid  # UUIDを生成するためのモジュールをインポート
-from django.contrib.auth.hashers import make_password  # パスワードをハッシュ化するための関数をインポート
-class Item(models.Model):  # Itemという名前の新しいモデル（データベースのテーブルに対応）を作成しており、models.Modelを継承する
-    # nameというフィールド（データベースの列に対応）を定義している。文字列（CharField）で最大長は100文字
+from django.db import models
+from django.contrib.auth.hashers import make_password
+
+class Item(models.Model):
     name = models.CharField(max_length=100)
-    # descriptionというフィールドを定義。長いテキスト（TextField）を保存できるようにしている
     description = models.TextField()
 
 class Room(models.Model):
@@ -15,33 +12,18 @@ class Room(models.Model):
         ('in_progress', 'In Progress'),
         ('finished', 'Finished'),
     ]
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default='waiting')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
     currentSeq = models.IntegerField()
     quizId = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-
 class User(models.Model):
-    # ユーザーを一意に識別するためのUUIDフィールド
     uuid = models.TextField(unique=True)
-    username = models.CharField(
-        max_length=150, blank=True, null=True)  # ユーザー名のフィールド
-    icon = models.TextField(blank=True, null=True)  # ユーザーアイコンの画像フィールド
-    loginId = models.CharField(
-        max_length=150, unique=True, blank=True, null=True)
+    username = models.CharField(max_length=150, blank=True, null=True)
+    icon = models.TextField(blank=True, null=True)
+    loginId = models.CharField(max_length=150, unique=True, blank=True, null=True)
     password = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    # def save(self, *args, **kwargs):
-    #     # パスワードをハッシュ化（既にハッシュ化されているなら無視）
-    #     if self.password and not self.password.startswith('pbkdf2_'):
-    #         self.password = make_password(self.password)
-    #     super().save(*args, **kwargs)
-
-    # def __str__(self):
-    #     return f"{self.username or 'Guest'} ({self.uuid})"
-
 
 class QuizData1(models.Model):
     questionId = models.IntegerField(unique=True)
@@ -56,7 +38,7 @@ class QuizData1(models.Model):
 
 class Answer(models.Model):
     roomPK_id = models.IntegerField()
-    uuid = models.TextField(unique=True)
+    uuid = models.TextField()  # ← unique=True を削除
     roomId = models.IntegerField()
     currentSeq = models.IntegerField(default=0)
     answerTime = models.BooleanField(default=False)
@@ -65,8 +47,8 @@ class Answer(models.Model):
     isCorrect = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.uuid.username} answered {self.answer} for question {self.questionId} in room {self.roomId.roomId}"
-    
+        return f"{self.uuid} answered question {self.questionId} in room {self.roomId}"
+
 class Summary(models.Model):
     uuid = models.TextField(unique=True)
     totalQuestions = models.IntegerField(default=0)
@@ -76,8 +58,8 @@ class Summary(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.uuid.username}'s Summary - Score: {self.finalScore}, Rank: {self.finalRank}"
-    
+        return f"Summary for {self.uuid} - Score: {self.finalScore}, Rank: {self.finalRank}"
+
 class QuizData2(models.Model):
     questionId = models.IntegerField(unique=True)
     quizId = models.IntegerField()
@@ -88,7 +70,7 @@ class QuizData2(models.Model):
 
     def __str__(self):
         return f"Quiz {self.questionId}: {self.question[:20]}..."
-    
+
 class QuizData3(models.Model):
     questionId = models.IntegerField(unique=True)
     quizId = models.IntegerField()
@@ -99,18 +81,22 @@ class QuizData3(models.Model):
 
     def __str__(self):
         return f"Quiz {self.questionId}: {self.question[:20]}..."
-    
+
 class Ranking(models.Model):
     username = models.CharField(max_length=150, blank=True, null=True)
     finalScore = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.username or 'Anonymous'} - Score: {self.finalScore}"
+
 class RoomParticipants(models.Model):
     roomId = models.IntegerField()
-    uuid = models.TextField(unique=True)
+    uuid = models.TextField()
     currentScore = models.IntegerField(default=0)
     joined_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('roomId', 'uuid')
+
     def __str__(self):
-        return f"{self.uuid.username} in {self.roomId.roomId}"
+        return f"{self.uuid} in room {self.roomId}"

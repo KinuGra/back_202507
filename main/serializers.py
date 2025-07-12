@@ -33,12 +33,14 @@ UserモデルのデータをJSON形式などに変換するクラス。
 serializers.ModelSerializerを継承しています
 '''
 class UserSerializer(serializers.ModelSerializer):
-    # UserSerializerクラスの設定を行う内部クラスMetaを定義
+    icon = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    loginId = serializers.CharField(required=False, allow_null=True)
+    password = serializers.CharField(required=False, allow_null=True)
+
     class Meta:
-        # シリアライザが扱うモデルをUserに指定しています
         model = User
-        # シリアライズされるときに含めるフィールドをuuid、username、icon、loginId、password、created_atに限定する
-        fields = ['uuid', 'username', 'icon', 'loginId', 'password', 'created_at']
+        fields = ['uuid', 'username', 'icon', 'loginId', 'password']
+
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
