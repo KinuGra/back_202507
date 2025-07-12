@@ -95,3 +95,12 @@ class QuizData1(models.Model):
 
     def __str__(self):
         return f"Quiz {self.questionId}: {self.question[:20]}..."
+
+class RoomParticipants(models.Model):
+    roomId = models.ForeignKey(Room, on_delete=models.CASCADE)
+    uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    currentScore = models.IntegerField(default=0)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.uuid.username} in {self.roomId.roomId}"
