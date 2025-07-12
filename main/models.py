@@ -24,7 +24,7 @@ class Room(models.Model):
 
 class User(models.Model):
     # ユーザーを一意に識別するためのUUIDフィールド
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    uuid = models.TextField(unique=True)
     username = models.CharField(
         max_length=150, blank=True, null=True)  # ユーザー名のフィールド
     icon = models.TextField(blank=True, null=True)  # ユーザーアイコンの画像フィールド
