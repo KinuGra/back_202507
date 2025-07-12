@@ -43,12 +43,29 @@ def submit_answer(request):
     """回答送信API"""
     try:
         data = json.loads(request.body)
+        print('Submit answer request data:', data)
         room_id = data.get('roomId')
         user_uuid = data.get('userUuid')
         answer = data.get('answer')
+        print(f'Parsed data - roomId: {room_id}, userUuid: {user_uuid}, answer: {answer}')
         
-        room = Room.objects.get(roomId=room_id)
-        user = User.objects.get(uuid=user_uuid)
+        try:
+            room = Room.objects.get(roomId=room_id)
+            print(f'Found room: {room.id}, status: {room.status}, currentSeq: {room.currentSeq}')
+        except Room.DoesNotExist:
+            print(f'Room not found: {room_id}')
+            return JsonResponse({'error': f'Room not found: {room_id}'}, status=404)
+            
+        try:
+            user = User.objects.get(uuid=user_uuid)
+            print(f'Found user by UUID: {user.uuid}')
+        except User.DoesNotExist:
+            try:
+                user = User.objects.get(loginId=user_uuid)
+                print(f'Found user by loginId: {user.loginId}')
+            except User.DoesNotExist:
+                print(f'User not found: {user_uuid}')
+                return JsonResponse({'error': f'User not found: {user_uuid}'}, status=404)
         
         # 現在の問題を取得
         current_quiz = QuizData1.objects.filter(
@@ -59,15 +76,17 @@ def submit_answer(request):
         is_correct = current_quiz and answer == current_quiz.answer_full
         
         # 回答を記録
+        print(f'Creating answer record - roomPK_id: {room.id}, uuid: {str(user.uuid)}, roomId: {room.id}')
         Answer.objects.create(
-            roomPK_id=room,
-            uuid=user,
-            roomId=room,
+            roomPK_id=room.id,
+            uuid=str(user.uuid),
+            roomId=room.id,
             currentSeq=room.currentSeq,
             quizId=room.quizId,
             questionId=current_quiz.questionId if current_quiz else 0,
             isCorrect=is_correct
         )
+        print('Answer record created successfully')
         
         # Pusherで結果を配信
         trigger_answer_result(room.roomId, {
