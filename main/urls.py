@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+from . import views, quiz_views
 
 router = DefaultRouter()
 router.register(r'items', views.ItemViewSet)
@@ -19,5 +19,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('api/', include(router.urls)),
     path('api/room-exists/', views.room_exists_api, name='room_exists'),
+    path('api/quiz/start/', quiz_views.start_quiz_game, name='start_quiz_game'),
+    path('api/quiz/submit/', quiz_views.submit_answer, name='submit_answer'),
+    path('api/quiz/question/', quiz_views.get_quiz_question, name='get_quiz_question'),
     path('test/error/', views.test_error, name="test_error"),
 ]
