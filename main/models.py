@@ -27,8 +27,7 @@ class User(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(
         max_length=150, blank=True, null=True)  # ユーザー名のフィールド
-    icon = models.ImageField(upload_to='user_icons/',
-                             blank=True, null=True)  # ユーザーアイコンの画像フィールド
+    icon = models.TextField(blank=True, null=True)  # ユーザーアイコンの画像フィールド
     loginId = models.CharField(
         max_length=150, unique=True, blank=True, null=True)
     password = models.CharField(max_length=128, blank=True, null=True)
