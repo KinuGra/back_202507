@@ -157,3 +157,7 @@ class Ranking(models.Model):
 
     def __str__(self):
         return f"{self.username or 'Anonymous'} - Score: {self.finalScore}"
+    
+class Participantion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
