@@ -2,9 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET
 from rest_framework import viewsets # DRFからviewsetsをインポート。ウェブページの表示やデータ処理などの一連の操作をひとまとめにしたクラス（=ビューセット）
-from .models import Item, Room, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
+from .models import Item, Room, User, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
 from .serializers import ItemSerializer, UserSerializer, RoomSerializer, QuizData1Serializer # 同じディレクトリにあるserializers.pyファイルからItemSerializerとRoomSerializerをインポート
-from .models import Item, Room, User, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルをインポート
 
 # Userモデルに対するCRUD（Create, Read, Update, Delete）操作を処理するUserViewSetクラスを定義
 # viewsets.ModelViewSetを継承している
