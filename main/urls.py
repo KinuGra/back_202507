@@ -7,6 +7,7 @@ router.register(r'items', views.ItemViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'rooms', views.RoomViewSet)
 router.register(r'quizdata1', views.QuizData1ViewSet)
+router.register(r'roomparticipants', views.RoomParticipantsViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),

@@ -1,5 +1,5 @@
 from rest_framework import serializers # Django REST Frameworkのserializersモジュールをインポート
-from .models import Item, Room, User, Room, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
+from .models import Item, Room, RoomParticipants, User, Room, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
 
 '''
 ItemモデルのデータをJSON形式などに変換するクラス。
@@ -49,3 +49,8 @@ class QuizData1Serializer(serializers.ModelSerializer):
     class Meta:
         model = QuizData1
         fields = ['questionId', 'quizId', 'question', 'answer_letters', 'answer_full', 'category']
+
+class RoomParticipantsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoomParticipants
+        fields = ['roomId', 'uuid', 'currentScore', 'joined_at']
