@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET
 from rest_framework import viewsets # DRFからviewsetsをインポート。ウェブページの表示やデータ処理などの一連の操作をひとまとめにしたクラス（=ビューセット）
-from .models import Item, Room, QuizData1, RoomParticipants # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
-from .serializers import ItemSerializer, RoomParticipantsSerializer, UserSerializer, RoomSerializer, QuizData1Serializer # 同じディレクトリにあるserializers.pyファイルからItemSerializerとRoomSerializerをインポート
+from .models import Item, Room, Ranking, QuizData1, QuizData2, QuizData3, RoomParticipants, Answer, Summary, User # 同じディレクトリにあるmodels.pyファイルからItemモデルとRoomモデルをインポート
+from .serializers import ItemSerializer, RoomParticipantsSerializer, RankingSerializer, UserSerializer, RoomSerializer, QuizData1Serializer, QuizData2Serializer, QuizData3Serializer, AnswerSerializer, SummarySerializer # 同じディレクトリにあるserializers.pyファイルからItemSerializerとRoomSerializerをインポート
 from .models import Item, Room, User, QuizData1 # 同じディレクトリにあるmodels.pyファイルからItemモデルをインポート
 
 # Userモデルに対するCRUD（Create, Read, Update, Delete）操作を処理するUserViewSetクラスを定義
@@ -27,9 +27,29 @@ class QuizData1ViewSet(viewsets.ModelViewSet):
     queryset = QuizData1.objects.all()
     serializer_class = QuizData1Serializer
 
+class QuizData2ViewSet(viewsets.ModelViewSet):
+    queryset = QuizData2.objects.all()
+    serializer_class = QuizData2Serializer
+
+class QuizData3ViewSet(viewsets.ModelViewSet):
+    queryset = QuizData3.objects.all()
+    serializer_class = QuizData3Serializer
+
 class RoomParticipantsViewSet(viewsets.ModelViewSet):
     queryset = RoomParticipants.objects.all()
     serializer_class = RoomParticipantsSerializer
+
+class AnswerViewSet(viewsets.ModelViewSet):
+    queryset = Answer.objects.all()
+    serializer_class = AnswerSerializer
+
+class SummaryViewSet(viewsets.ModelViewSet):
+    queryset = Summary.objects.all()
+    serializer_class = SummarySerializer
+
+class RankingViewSet(viewsets.ModelViewSet):
+    queryset = Ranking.objects.all()
+    serializer_class = RankingSerializer
 
 # ルームidが存在するかどうかを返す
 @require_GET
