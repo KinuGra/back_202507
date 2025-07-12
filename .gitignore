@@ -1,5 +1,20 @@
 .env*
+.env
+.env.local
+.env.production
 venv/
 __pycache__/
 *.pyc
 *.sqlite3
+
+# API Keys and secrets
+config/secrets.py
+*.key
+*.pem
+
+# AWS credentials
+.aws/
+aws-credentials.json
+
+# Pusher credentials
+pusher-config.json

@@ -34,6 +34,12 @@ DEBUG = env.bool('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 DISCORD_WEBHOOK_URL = env("DISCORD_WEBHOOK_URL")
 
+# Pusher設定
+PUSHER_APP_ID = env('PUSHER_APP_ID')
+PUSHER_KEY = env('PUSHER_KEY')
+PUSHER_SECRET = env('PUSHER_SECRET')
+PUSHER_CLUSTER = env('PUSHER_CLUSTER')
+
 # Discordにログを送る処理
 LOGGING = {
     "version": 1,
@@ -72,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'channels',
     'main',
 ]
 
@@ -161,3 +168,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS. myアプリのみ許可
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
+
+# WebSocket設定
+ASGI_APPLICATION = 'back_202507.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
