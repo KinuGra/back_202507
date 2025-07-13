@@ -38,13 +38,14 @@ class QuizData1(models.Model):
 
 class Answer(models.Model):
     roomPK_id = models.IntegerField()
-    uuid = models.TextField()  # ← unique=True を削除
+    uuid = models.TextField()
     roomId = models.IntegerField()
     currentSeq = models.IntegerField(default=0)
-    answerTime = models.BooleanField(default=False)
+    answerTime = models.DateTimeField(auto_now_add=True)  # タイムスタンプに変更
     quizId = models.IntegerField()
     questionId = models.IntegerField()
     isCorrect = models.BooleanField(default=False)
+    buzzOrder = models.IntegerField(default=0)  # 早押し順位
 
     def __str__(self):
         return f"{self.uuid} answered question {self.questionId} in room {self.roomId}"
