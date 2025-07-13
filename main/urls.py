@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/quiz/question/', quiz_views.get_quiz_question, name='get_quiz_question'),
     path('api/quiz/participants/', quiz_views.get_room_participants, name='get_room_participants'),
     path('api/quiz/join/', quiz_views.join_room, name='join_room'),
+    path('api/quiz/buzz/', quiz_views.buzz_in, name='buzz_in'),
     path('api/debug/database/', debug_views.database_debug, name='database_debug'),
     path('test/error/', views.test_error, name="test_error"),
 ]

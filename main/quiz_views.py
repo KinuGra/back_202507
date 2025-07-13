@@ -39,29 +39,83 @@ def start_quiz_game(request):
 
 @csrf_exempt
 @require_POST
+def buzz_in(request):
+    """早押しAPI"""
+    try:
+        data = json.loads(request.body)
+        room_id = data.get('roomId')
+        user_uuid = data.get('userUuid')
+        
+        room = Room.objects.get(roomId=room_id)
+        user = User.objects.get(uuid=user_uuid)
+        
+        # 早押し順位を決定
+        existing_buzzes = Answer.objects.filter(
+            roomId=room.id,
+            currentSeq=room.currentSeq,
+            questionId=room.currentSeq
+        ).count()
+        
+        # 早押し記録を作成
+        buzz_record = Answer.objects.create(
+            roomPK_id=room.id,
+            uuid=str(user.uuid),
+            roomId=room.id,
+            currentSeq=room.currentSeq,
+            quizId=room.quizId,
+            questionId=room.currentSeq,
+            isCorrect=False,  # まだ回答していない
+            buzzOrder=existing_buzzes + 1
+        )
+        
+        # 早押し結果を配信
+        trigger_buzz_result(room.roomId, {
+            'userId': str(user.uuid),
+            'buzzOrder': buzz_record.buzzOrder,
+            'hasAnswerRight': buzz_record.buzzOrder <= 3  # 上位3名に回答権
+        })
+        
+        return JsonResponse({
+            'success': True,
+            'buzzOrder': buzz_record.buzzOrder,
+            'hasAnswerRight': buzz_record.buzzOrder <= 3
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@require_POST
 def submit_answer(request):
     """回答送信API"""
     try:
         data = json.loads(request.body)
-        print('Submit answer request data:', data)
         room_id = data.get('roomId')
         user_uuid = data.get('userUuid')
         answer = data.get('answer')
-        print(f'Parsed data - roomId: {room_id}, userUuid: {user_uuid}, answer: {answer}')
         
-        try:
-            room = Room.objects.get(roomId=room_id)
-            print(f'Found room: {room.id}, status: {room.status}, currentSeq: {room.currentSeq}')
-        except Room.DoesNotExist:
-            print(f'Room not found: {room_id}')
-            return JsonResponse({'error': f'Room not found: {room_id}'}, status=404)
-            
-        try:
-            user = User.objects.get(uuid=user_uuid)
-            print(f'Found user by UUID: {user.uuid}')
-        except User.DoesNotExist:
-            print(f'User not found: {user_uuid}')
-            return JsonResponse({'error': f'User not found: {user_uuid}'}, status=404)
+        room = Room.objects.get(roomId=room_id)
+        user = User.objects.get(uuid=user_uuid)
+        
+        # 早押し記録を取得（ない場合は自動作成）
+        buzz_record = Answer.objects.filter(
+            roomId=room.id,
+            uuid=str(user.uuid),
+            currentSeq=room.currentSeq,
+            questionId=room.currentSeq
+        ).first()
+        
+        # 早押し記録がない場合は自動作成（従来の直接回答方式）
+        if not buzz_record:
+            buzz_record = Answer.objects.create(
+                roomPK_id=room.id,
+                uuid=str(user.uuid),
+                roomId=room.id,
+                currentSeq=room.currentSeq,
+                quizId=room.quizId,
+                questionId=room.currentSeq,
+                isCorrect=False,
+                buzzOrder=1  # 直接回答の場合は1位扱い
+            )
         
         # 現在の問題を取得
         current_quiz = QuizData1.objects.filter(
@@ -69,31 +123,22 @@ def submit_answer(request):
             questionId=room.currentSeq
         ).first()
         
+        print(f'Answer comparison: user="{answer}" vs correct="{current_quiz.answer_full if current_quiz else "None"}"')
         is_correct = current_quiz and answer == current_quiz.answer_full
         
-        # 回答を記録
-        print(f'Creating answer record - roomPK_id: {room.id}, uuid: {str(user.uuid)}, roomId: {room.id}')
-        Answer.objects.create(
-            roomPK_id=room.id,
-            uuid=str(user.uuid),
-            roomId=room.id,
-            currentSeq=room.currentSeq,
-            quizId=room.quizId,
-            questionId=current_quiz.questionId if current_quiz else 0,
-            isCorrect=is_correct
-        )
-        print('Answer record created successfully')
+        # 回答結果を更新
+        buzz_record.isCorrect = is_correct
+        buzz_record.save()
         
-        # Pusherで結果を配信
+        # 回答結果を配信
         trigger_answer_result(room.roomId, {
             'userId': str(user.uuid),
             'isCorrect': is_correct,
             'correctAnswer': current_quiz.answer_full if current_quiz else None
         })
         
-        # 正解の場合、スコアを加算して次の問題に進む
+        # 正解の場合、スコア加算
         if is_correct:
-            # スコア加算
             participant, created = RoomParticipants.objects.get_or_create(
                 roomId=room.id,
                 uuid=str(user.uuid),
@@ -101,14 +146,13 @@ def submit_answer(request):
             )
             participant.currentScore += 1
             participant.save()
-            print(f'Score updated for {user.uuid}: {participant.currentScore}')
             
-            # スコア更新をPusherで配信
             trigger_score_update(room.roomId, {
                 'userId': str(user.uuid),
                 'score': participant.currentScore
             })
             
+            # 正解者が出たら次の問題へ
             advance_to_next_question(room)
         
         return JsonResponse({
@@ -117,6 +161,7 @@ def submit_answer(request):
             'correctAnswer': current_quiz.answer_full if current_quiz else None
         })
     except Exception as e:
+        print(f'Submit answer error: {e}')
         return JsonResponse({'error': str(e)}, status=400)
 
 @require_GET
@@ -148,7 +193,21 @@ def join_room(request):
         user_uuid = data.get('userUuid')
         
         room = Room.objects.get(roomId=room_id_str)
-        user = User.objects.get(uuid=user_uuid)
+        
+        # ユーザーが存在しない場合は作成
+        username = data.get('username', 'Guest User')
+        user, user_created = User.objects.get_or_create(
+            uuid=user_uuid,
+            defaults={
+                'username': username,
+                'icon': '/images/avatars/person_avatar_1.png',
+                'loginId': None,
+                'password': 'default'
+            }
+        )
+        
+        if user_created:
+            print(f'Created new user: {user.uuid}')
         
         participant, created = RoomParticipants.objects.get_or_create(
             roomId=room.id,
@@ -158,9 +217,11 @@ def join_room(request):
         
         return JsonResponse({
             'success': True,
-            'created': created
+            'participant_created': created,
+            'user_created': user_created
         })
     except Exception as e:
+        print(f'Join room error: {e}')
         return JsonResponse({'error': str(e)}, status=400)
 
 @require_GET
@@ -254,6 +315,17 @@ def trigger_score_update(room_id, data):
     try:
         requests.post('http://localhost:3000/api/quiz', json={
             'action': 'update_score',
+            'roomId': room_id,
+            'data': data
+        })
+    except Exception as e:
+        print(f'Pusher trigger error: {e}')
+
+def trigger_buzz_result(room_id, data):
+    """早押し結果イベントをPusherで送信"""
+    try:
+        requests.post('http://localhost:3000/api/quiz', json={
+            'action': 'buzz_result',
             'roomId': room_id,
             'data': data
         })
