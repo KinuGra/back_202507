@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views, quiz_views
+from . import views, quiz_views, debug_views
 
 router = DefaultRouter()
 router.register(r'items', views.ItemViewSet)
@@ -22,5 +22,8 @@ urlpatterns = [
     path('api/quiz/start/', quiz_views.start_quiz_game, name='start_quiz_game'),
     path('api/quiz/submit/', quiz_views.submit_answer, name='submit_answer'),
     path('api/quiz/question/', quiz_views.get_quiz_question, name='get_quiz_question'),
+    path('api/quiz/participants/', quiz_views.get_room_participants, name='get_room_participants'),
+    path('api/quiz/join/', quiz_views.join_room, name='join_room'),
+    path('api/debug/database/', debug_views.database_debug, name='database_debug'),
     path('test/error/', views.test_error, name="test_error"),
 ]
