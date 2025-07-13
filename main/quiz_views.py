@@ -60,12 +60,8 @@ def submit_answer(request):
             user = User.objects.get(uuid=user_uuid)
             print(f'Found user by UUID: {user.uuid}')
         except User.DoesNotExist:
-            try:
-                user = User.objects.get(loginId=user_uuid)
-                print(f'Found user by loginId: {user.loginId}')
-            except User.DoesNotExist:
-                print(f'User not found: {user_uuid}')
-                return JsonResponse({'error': f'User not found: {user_uuid}'}, status=404)
+            print(f'User not found: {user_uuid}')
+            return JsonResponse({'error': f'User not found: {user_uuid}'}, status=404)
         
         # 現在の問題を取得
         current_quiz = QuizData1.objects.filter(
@@ -95,8 +91,24 @@ def submit_answer(request):
             'correctAnswer': current_quiz.answer_full if current_quiz else None
         })
         
-        # 正解の場合、次の問題に進む
+        # 正解の場合、スコアを加算して次の問題に進む
         if is_correct:
+            # スコア加算
+            participant, created = RoomParticipants.objects.get_or_create(
+                roomId=room.id,
+                uuid=str(user.uuid),
+                defaults={'currentScore': 0}
+            )
+            participant.currentScore += 1
+            participant.save()
+            print(f'Score updated for {user.uuid}: {participant.currentScore}')
+            
+            # スコア更新をPusherで配信
+            trigger_score_update(room.roomId, {
+                'userId': str(user.uuid),
+                'score': participant.currentScore
+            })
+            
             advance_to_next_question(room)
         
         return JsonResponse({
@@ -124,6 +136,70 @@ def get_quiz_question(request):
             'currentSeq': room.currentSeq
         })
     except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@require_POST
+def join_room(request):
+    """ルーム参加API"""
+    try:
+        data = json.loads(request.body)
+        room_id_str = data.get('roomId')
+        user_uuid = data.get('userUuid')
+        
+        room = Room.objects.get(roomId=room_id_str)
+        user = User.objects.get(uuid=user_uuid)
+        
+        participant, created = RoomParticipants.objects.get_or_create(
+            roomId=room.id,
+            uuid=str(user.uuid),
+            defaults={'currentScore': 0}
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'created': created
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@require_GET
+def get_room_participants(request):
+    """ルーム参加者取得API"""
+    try:
+        room_id_str = request.GET.get('roomId')
+        print(f'Getting participants for roomId: {room_id_str}')
+        
+        # Room.roomIdで検索してRoom.idを取得
+        room = Room.objects.get(roomId=room_id_str)
+        print(f'Found room with id: {room.id}')
+        
+        # RoomParticipants.roomIdはRoom.idを参照
+        participants = RoomParticipants.objects.filter(roomId=room.id)
+        print(f'Found {participants.count()} participants')
+        
+        participant_data = []
+        for p in participants:
+            try:
+                user = User.objects.get(uuid=p.uuid)
+                participant_data.append({
+                    'uuid': p.uuid,
+                    'name': user.username or 'Anonymous',
+                    'avatarUrl': user.icon or '/images/avatars/person_avatar_1.png',
+                    'score': p.currentScore
+                })
+            except User.DoesNotExist:
+                print(f'User not found for uuid: {p.uuid}')
+        
+        print(f'Returning {len(participant_data)} participants')
+        return JsonResponse({
+            'participants': participant_data
+        })
+    except Room.DoesNotExist:
+        print(f'Room not found: {room_id_str}')
+        return JsonResponse({'error': f'Room not found: {room_id_str}'}, status=404)
+    except Exception as e:
+        print(f'Error getting participants: {e}')
         return JsonResponse({'error': str(e)}, status=400)
 
 def advance_to_next_question(room):
@@ -167,6 +243,17 @@ def trigger_answer_result(room_id, data):
     try:
         requests.post('http://localhost:3000/api/quiz', json={
             'action': 'submit_answer',
+            'roomId': room_id,
+            'data': data
+        })
+    except Exception as e:
+        print(f'Pusher trigger error: {e}')
+
+def trigger_score_update(room_id, data):
+    """スコア更新イベントをPusherで送信"""
+    try:
+        requests.post('http://localhost:3000/api/quiz', json={
+            'action': 'update_score',
             'roomId': room_id,
             'data': data
         })
